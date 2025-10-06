@@ -8,6 +8,15 @@ echo "Starting script in folder: $(pwd)"
 echo "Source directory: $SOURCE_DIR"
 echo "Destination directory: $DEST_DIR"
 
+# Clean up destination directory if it exists
+if [ -d "$DEST_DIR" ]; then
+    echo "Removing existing destination directory: $DEST_DIR"
+    rm -rf "$DEST_DIR"
+fi
+
+# Create fresh destination directory
+mkdir -p "$DEST_DIR"
+
 # Copy source to destination
 cp -r "$SOURCE_DIR"/* "$DEST_DIR/"
 echo "Copied files from $SOURCE_DIR to $DEST_DIR"
