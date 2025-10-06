@@ -9,11 +9,11 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ensures full history for commits
 
-      # Step 2: Get latest release tag from upstream
       - name: Get latest release info
         id: release
         run: |
@@ -21,7 +21,6 @@ jobs:
           echo "tag=$LATEST" >> $GITHUB_OUTPUT
           echo "Latest release: $LATEST"
 
-      # Step 3: Download release
       - name: Download release tarball
         run: |
           curl -L https://github.com/element-hq/element-web/archive/refs/tags/${{ steps.release.outputs.tag }}.tar.gz \
@@ -29,7 +28,6 @@ jobs:
           tar -xzf element-web.tar.gz
           mv element-web-* upstream-release
 
-      # Step 4: Run custom script, output to stable folder
       - name: Run rename/move script
         run: |
           chmod +x ./scripts/rename.sh
@@ -37,12 +35,10 @@ jobs:
           mkdir -p ./processed
           ./scripts/rename.sh ./upstream-release ./processed
 
-      # Step 5: Sync processed files into repo root safely
       - name: Sync processed files
         run: |
           rsync -a --delete --exclude='.github' --exclude='scripts' ./processed/ ./
 
-      # Step 6: Commit and push changes
       - name: Commit and push
         run: |
           git config user.name "github-actions"
@@ -51,7 +47,6 @@ jobs:
           git commit -m "Update to ${{ steps.release.outputs.tag }}" || echo "No changes to commit"
           git push origin main
 
-      # Step 7: Notify via issue
       - name: Notify via GitHub issue
         uses: peter-evans/create-issue-from-file@v5
         with:
