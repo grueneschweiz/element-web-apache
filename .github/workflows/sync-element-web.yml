@@ -62,7 +62,7 @@ jobs:
           rm -rf upstream-release element-web.tar.gz
           
           # Save the current release version
-          echo "${{ steps.release.outputs.tag }}" > current-release.txt
+          # echo "${{ steps.release.outputs.tag }}" > current-release.txt #TODO MSC
           
           # Only commit if there are changes
           if [ -n "$(git status --porcelain)" ]; then

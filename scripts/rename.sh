@@ -1,7 +1,19 @@
 #!/bin/bash
 
-BASE_DIR="."
+# Accept source and destination directories as arguments
+SOURCE_DIR="${1:-.}"
+DEST_DIR="${2:-./processed}"
+
 echo "Starting script in folder: $(pwd)"
+echo "Source directory: $SOURCE_DIR"
+echo "Destination directory: $DEST_DIR"
+
+# Copy source to destination
+cp -r "$SOURCE_DIR"/* "$DEST_DIR/"
+echo "Copied files from $SOURCE_DIR to $DEST_DIR"
+
+# Work in the destination directory
+BASE_DIR="$DEST_DIR"
 
 FILES=(
 bold.b7f0698.svg copy.95010ef.svg forward.7d44a5b.svg location-pin-solid.5b99343.svg pop-out.0a8fde3.svg share-screen-solid.c7c1310.svg user-profile-solid.e886eb1.svg
@@ -15,17 +27,33 @@ close.5ef7caf.svg favourite-solid.a1d4606.svg leave.8b03b57.svg play-solid.05663
 collapse.fc765b9.svg files.453e84c.svg link.d0734d2.svg plus.95ca4d1.svg settings-solid.94c318a.svg user-add-solid.6a5ddef.svg
 )
 
+# Track unique folders that contain icon references
+declare -A FOLDERS_FOUND
+
 for filename in "${FILES[@]}"; do
     # Escape regex special chars for sed
     ESCAPED_FILENAME=$(printf '%s' "$filename" | sed 's/[.[\*^$/]/\\&/g')
     
     # Find all files containing this reference
     grep -rl "/icons/$filename" "$BASE_DIR" | while read -r file; do
-        echo "Processing folder: $(dirname "$file")"
+        folder=$(dirname "$file")
+        FOLDERS_FOUND["$folder"]=1
+        echo "Found reference in: $file"
         sed -i "s|/icons/$ESCAPED_FILENAME|/ui-icons/$filename|g" "$file"
         echo "Updated: $file"
     done
 done
+
+# Log summary of folders
+echo ""
+echo "=== SUMMARY: Folders containing icon references ==="
+find "$BASE_DIR" -type f -exec grep -l "/icons/" {} \; | while read -r file; do
+    dirname "$file"
+done | sort -u | while read -r folder; do
+    echo "  - $folder"
+done
+echo "=== END SUMMARY ==="
+echo ""
 
 # --- Handle index.html separately ---
 INDEX_FILE="$BASE_DIR/index.html"
