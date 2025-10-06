@@ -58,12 +58,15 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           
+          # Clean up temporary files
+          rm -rf upstream-release element-web.tar.gz
+          
           # Save the current release version
           echo "${{ steps.release.outputs.tag }}" > current-release.txt
           
           # Only commit if there are changes
           if [ -n "$(git status --porcelain)" ]; then
-            git add .
+            git add processed/ current-release.txt
             git commit -m "Update to ${{ steps.release.outputs.tag }}"
             git push origin main
           else
