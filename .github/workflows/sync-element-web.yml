@@ -66,7 +66,8 @@ jobs:
           
           # Only commit if there are changes
           if [ -n "$(git status --porcelain)" ]; then
-            git add processed/ current-release.txt
+            git add processed/
+            [ -f current-release.txt ] && git add current-release.txt
             git commit -m "Update to ${{ steps.release.outputs.tag }}"
             git push origin main
           else
