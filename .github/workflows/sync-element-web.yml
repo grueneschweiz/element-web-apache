@@ -32,7 +32,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          rsync -a --delete --exclude='.github' --exclude='scripts' ./processed/ ./
+          rsync -a --delete --exclude='.github' --exclude='scripts' --ignore-missing-args ./processed/ ./
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
