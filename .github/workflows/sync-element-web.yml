@@ -21,8 +21,24 @@ jobs:
           LATEST=$(curl -s https://api.github.com/repos/element-hq/element-web/releases/latest | jq -r '.tag_name')
           echo "tag=$LATEST" >> $GITHUB_OUTPUT
           echo "Latest release: $LATEST"
+          
+          # Check if this version is already processed
+          if [ -f "current-release.txt" ]; then
+            CURRENT=$(cat current-release.txt)
+            if [ "$CURRENT" == "$LATEST" ]; then
+              echo "skip=true" >> $GITHUB_OUTPUT
+              echo "Release $LATEST already processed, skipping..."
+            else
+              echo "skip=false" >> $GITHUB_OUTPUT
+              echo "New release detected: $CURRENT -> $LATEST"
+            fi
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "No current-release.txt found, processing $LATEST"
+          fi
 
       - name: Download release tarball
+        if: steps.release.outputs.skip != 'true'
         run: |
           curl -L https://github.com/element-hq/element-web/archive/refs/tags/${{ steps.release.outputs.tag }}.tar.gz \
             -o element-web.tar.gz
@@ -30,19 +46,21 @@ jobs:
           mv element-web-* upstream-release
 
       - name: Run rename/move script
+        if: steps.release.outputs.skip != 'true'
         run: |
           chmod +x ./scripts/rename.sh
           mkdir -p ./processed
           ./scripts/rename.sh ./upstream-release ./processed
 
-      - name: Sync processed files
-        run: |
-          rsync -a --delete --exclude='.git' --exclude='.github' --exclude='scripts' ./processed/ ./
-
       - name: Commit and push
+        if: steps.release.outputs.skip != 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+          
+          # Save the current release version
+          echo "${{ steps.release.outputs.tag }}" > current-release.txt
+          
           # Only commit if there are changes
           if [ -n "$(git status --porcelain)" ]; then
             git add .
@@ -53,6 +71,7 @@ jobs:
           fi
 
       - name: Notify via GitHub issue
+        if: steps.release.outputs.skip != 'true'
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "New Element Web release ${{ steps.release.outputs.tag }}"
