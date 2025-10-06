@@ -12,7 +12,8 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # ensures full history for commits
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Get latest release info
         id: release
@@ -31,7 +32,6 @@ jobs:
       - name: Run rename/move script
         run: |
           chmod +x ./scripts/rename.sh
-          # Make sure the folder exists
           mkdir -p ./processed
           ./scripts/rename.sh ./upstream-release ./processed
 
@@ -41,12 +41,16 @@ jobs:
 
       - name: Commit and push
         run: |
-          cd $GITHUB_WORKSPACE
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add .
-          git commit -m "Update to ${{ steps.release.outputs.tag }}" || echo "No changes to commit"
-          git push origin main
+          # Only commit if there are changes
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "Update to ${{ steps.release.outputs.tag }}"
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
 
       - name: Notify via GitHub issue
         uses: peter-evans/create-issue-from-file@v5
