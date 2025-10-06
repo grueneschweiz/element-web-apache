@@ -37,7 +37,7 @@ jobs:
 
       - name: Sync processed files
         run: |
-          rsync -a --delete --exclude='.github' --exclude='scripts' ./processed/ ./
+          rsync -a --delete --exclude='.git' --exclude='.github' --exclude='scripts' ./processed/ ./
 
       - name: Commit and push
         run: |
