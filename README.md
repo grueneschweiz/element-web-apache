@@ -31,41 +31,13 @@ When a new Element Web release is detected:
 
 The processed Element Web files are available in the `processed/` directory. Deploy them to your Apache web server as you would normally deploy Element Web.
 
-### Apache Configuration Example
+1. backup your config.json file
+2. Clone this repository to your hosting / server
+3. create a symlink to the /processed folder to serve the application
+4. whenever there's a new release, run git pull on your hosting / server
+5. copy your config.json file back into the processed folder
 
-```apache
-<VirtualHost *:443>
-    ServerName element.example.com
-    
-    DocumentRoot /var/www/element-web
-    
-    <Directory /var/www/element-web>
-        Options -Indexes +FollowSymLinks
-        AllowOverride None
-        Require all granted
-    </Directory>
-    
-    # SSL configuration
-    SSLEngine on
-    SSLCertificateFile /path/to/cert.pem
-    SSLCertificateKeyFile /path/to/key.pem
-</VirtualHost>
-```
-
-## Manual Processing
-
-To manually process a specific Element Web release:
-
-```bash
-# Download and extract Element Web
-curl -L https://github.com/element-hq/element-web/releases/download/v1.12.0/element-v1.12.0.tar.gz -o element-web.tar.gz
-tar -xzf element-web.tar.gz
-
-# Run the rename script
-./scripts/rename.sh ./element-v1.12.0 ./processed
-```
-
-## How It Works
+## How the search / replace script works
 
 The `scripts/rename.sh` script:
 1. Copies the source files to the destination directory
@@ -75,19 +47,6 @@ The `scripts/rename.sh` script:
 3. Updates `index.html` icon references
 4. Renames the physical `icons/` directory to `ui-icons/`
 
-## Repository Structure
-
-```
-.
-├── .github/
-│   └── workflows/
-│       └── sync-element-web.yml    # Automated sync workflow
-├── processed/                       # Processed Element Web files
-├── scripts/
-│   └── rename.sh                   # Icon path renaming script
-└── current-release.txt             # Tracks the current version
-```
-
 ## License
 
-This repository contains automation scripts and workflows. The Element Web application itself is licensed under the Apache License 2.0. See the [Element Web repository](https://github.com/element-hq/element-web) for details.
+This repository contains automation scripts and workflows and is licensed under **AGPL-3.0**. The `processed/` folder contains files from [element-web](https://github.com/element-hq/element-web) and remains licensed under **AGPL** according to the upstream license.
