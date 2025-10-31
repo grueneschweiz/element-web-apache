@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-      description: 'Skip creating the issue and upload the sanitized changelog as an artifact'
-      type: boolean
-      default: true
+        description: 'Skip creating the issue and upload the sanitized changelog as an artifact'
+        type: boolean
+        default: true
 
 jobs:
   sync:
