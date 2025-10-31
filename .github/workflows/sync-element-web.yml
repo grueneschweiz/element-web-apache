@@ -81,7 +81,11 @@ jobs:
           curl -s https://api.github.com/repos/element-hq/element-web/releases/tags/${{ steps.release.outputs.tag }} \
             | jq -r '.body' > ./changelog-excerpt.md
           echo "Release notes fetched from GitHub"
-      
+          
+          # Neutralize @-mentions (insert zero-width space after '@')
+          perl -CS -pe 's/@/@\x{200B}/g' ./changelog-excerpt.md > ./changelog-excerpt.sanitized.md
+          mv ./changelog-excerpt.sanitized.md ./changelog-excerpt.md
+
       - name: Notify via GitHub issue
         if: steps.release.outputs.skip != 'true'
         uses: peter-evans/create-issue-from-file@v5
