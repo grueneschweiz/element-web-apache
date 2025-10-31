@@ -2,8 +2,13 @@ name: Sync Element Web
 
 on:
   schedule:
-    - cron: "0 3 * * 1,4"  # every Monday and Thursday at 03:00 UTC
+    - cron: "0 3 * * 1,4"
   workflow_dispatch:
+    inputs:
+      dry_run:
+      description: 'Skip creating the issue and upload the sanitized changelog as an artifact'
+      type: boolean
+      default: true
 
 jobs:
   sync:
@@ -53,7 +58,7 @@ jobs:
           ./scripts/rename.sh ./upstream-release ./processed
 
       - name: Commit and push
-        if: steps.release.outputs.skip != 'true'
+        if: steps.release.outputs.skip != 'true' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
@@ -74,6 +79,13 @@ jobs:
             echo "No changes to commit"
           fi
 
+      - name: Show changes (dry-run only)
+        if: steps.release.outputs.skip != 'true' && github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        run: |
+          echo "=== Dry-run mode: showing changed file names ==="
+          git diff --stat
+          echo ""
+
       - name: Prepare changelog for issue
         if: steps.release.outputs.skip != 'true'
         run: |
@@ -82,15 +94,24 @@ jobs:
             | jq -r '.body' > ./changelog-excerpt.md
           echo "Release notes fetched from GitHub"
           
-          # Neutralize @-mentions (insert zero-width space after '@')
-          perl -CS -pe 's/@/@\x{200B}/g' ./changelog-excerpt.md > ./changelog-excerpt.sanitized.md
-          mv ./changelog-excerpt.sanitized.md ./changelog-excerpt.md
+          # Disable @-mentions (insert zero-width space after '@')
+          perl -CS -i -pe 's/@/@\x{200B}/g' ./changelog-excerpt.md
+          # Disable owner/repo#123 style references (insert zero-width space before '#')
+          perl -CS -i -pe 's/([A-Za-z0-9_.\-]+\/[A-Za-z0-9_.\-]+)#(\d+)/$1\x{200B}#$2/g' ./changelog-excerpt.md
+          # Disable full GitHub issue/PR URLs (insert zero-width space before number)
+          perl -CS -i -pe 's!(https://github\.com/[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+/(?:issues|pull))/(\d+)!$1/\x{200B}$2!g' ./changelog-excerpt.md
+
+      - name: Upload sanitized changelog (dry-run only)
+        if: steps.release.outputs.skip != 'true' && github.event_name == 'workflow_dispatch' && inputs.dry_run == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-preview
+          path: ./changelog-excerpt.md
 
       - name: Notify via GitHub issue
-        if: steps.release.outputs.skip != 'true'
+        if: steps.release.outputs.skip != 'true' && (github.event_name != 'workflow_dispatch' || inputs.dry_run != true)
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "New Element Web release ${{ steps.release.outputs.tag }}"
           content-filepath: ./changelog-excerpt.md
           token: ${{ secrets.GITHUB_TOKEN }}
-
