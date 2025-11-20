@@ -34,8 +34,12 @@ The processed Element Web files are available in the `processed/` directory. Dep
 1. backup your config.json file
 2. Clone this repository to your hosting / server
 3. create a symlink to the /processed folder to serve the application
-4. whenever there's a new release, run git pull on your hosting / server
-5. copy your config.json file back into the processed folder
+4. copy your config.json file back into the processed folder
+
+## Production update process
+
+1. backup your config.json `cp ./processed/config.json ./config.json`
+2. update the contents `git pull && cp config.json ./processed/config.json`
 
 ## How the search / replace script works
 
