@@ -1,3 +1,6 @@
 /processed/config.json
 config.json
 currently-deployed
+/.htaccess
+/processed/
+/processed.work.*/
