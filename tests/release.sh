@@ -8,7 +8,7 @@ export GITHUB_REPOSITORY=example/element-web-apache GITHUB_SHA=abc123
 export FIXTURE_JSON=${TEST_ROOT}/upstream.json NOTES_COPY=${TEST_ROOT}/notes.md
 
 jq -n --arg digest "sha256:$(printf 'a%.0s' {1..64})" \
-    '{tag_name: "v1.12.29", body: "Changes in Element Web\n- Fixed icons", assets: [{name: "element-v1.12.29.tar.gz", digest: $digest}]}' \
+    '{tag_name: "v1.12.29", body: "Changes in Element Web\n- Thanks @someone", assets: [{name: "element-v1.12.29.tar.gz", digest: $digest}]}' \
     > "${FIXTURE_JSON}"
 
 gh() {
@@ -36,10 +36,18 @@ gh() {
 export -f gh
 
 bash "${REPO_DIR}/scripts/publish-release.sh"
-grep -q 'Changes in Element Web' "${NOTES_COPY}"
-grep -q 'Fixed icons' "${NOTES_COPY}"
+grep -Fq 'https://github.com/element-hq/element-web/releases/tag/v1.12.29' "${NOTES_COPY}"
+if grep -Fq 'Changes in Element Web' "${NOTES_COPY}"; then
+    echo "Upstream changelog was copied into release notes" >&2
+    exit 1
+fi
 grep -q 'SHA-256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' "${NOTES_COPY}"
 grep -q 'element-v1.12.29.tar.gz' "${NOTES_COPY}"
+
+rm -- "${NOTES_COPY}"
+jq '.body = null' "${FIXTURE_JSON}" > "${TEST_ROOT}/no-body.json"
+FIXTURE_JSON=${TEST_ROOT}/no-body.json bash "${REPO_DIR}/scripts/publish-release.sh"
+grep -Fq 'https://github.com/element-hq/element-web/releases/tag/v1.12.29' "${NOTES_COPY}"
 
 rm -- "${NOTES_COPY}"
 RELEASE_EXISTS=1 bash "${REPO_DIR}/scripts/publish-release.sh"

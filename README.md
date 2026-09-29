@@ -19,7 +19,7 @@ The result goes to `processed/`. Serve that directory as the site root, for exam
 
 The archive is checked before the live directory is replaced. The digest checks the download against the release page, not the authenticity of that page. The `.htaccess` sets one-day caching for ordinary assets, no-cache for HTML, config, service worker and translations, and immutable caching for hashed bundles (when `mod_headers` is available).
 
-This repository publishes a GitHub release for each new upstream version it detects, with the upstream changelog and archive SHA-256. You can also run the workflow manually. Releases contain no build files. Run `bash tests/deploy.sh` and `bash tests/release.sh` for offline checks.
+This repository publishes a GitHub release for each new upstream version it detects, linking to the upstream changelog and listing the archive SHA-256. You can also run the workflow manually. Releases contain no build files. Run `bash tests/deploy.sh` and `bash tests/release.sh` for offline checks.
 
 ## License
 

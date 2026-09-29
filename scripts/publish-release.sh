@@ -23,8 +23,7 @@ fi
 {
     printf 'Upstream release: https://github.com/element-hq/element-web/releases/tag/%s\n\n' "${VERSION}"
     printf 'Archive: https://github.com/element-hq/element-web/releases/download/%s/element-%s.tar.gz\n' "${VERSION}" "${VERSION}"
-    printf 'SHA-256: %s\n\n' "${DIGEST}"
-    jq -er '.body | select(type == "string" and length > 0)' "${RELEASE_JSON}"
+    printf 'SHA-256: %s\n' "${DIGEST}"
 } > "${NOTES_FILE}"
 
 gh release create "${TAG}" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" \
