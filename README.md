@@ -1,56 +1,30 @@
-# Element Web for Apache
+# Element Web on shared Apache hosting
 
-This repository automatically syncs [Element Web](https://github.com/element-hq/element-web) releases and renames icon paths to avoid conflicts with Apache's `mod_alias` icon directory.
+Apache's server-level `/icons/` alias can hide [Element Web](https://github.com/element-hq/element-web)'s icons. This script deploys a chosen release with its icon directory and CSS/HTML references renamed to `/ui-icons/`. If you control the Apache virtual host, fix the alias there instead.
 
-## Problem
+## Deploy
 
-Apache's `mod_alias` module typically maps `/icons/` to the server's icon directory (e.g., `/usr/share/apache2/icons/`). This conflicts with Element Web's `/icons/` directory, causing the application to fail loading its UI icons.
+You need Bash, curl, tar and sha256sum on the host. Keep this checkout outside the web root.
 
-## Solution
+1. Put your Element `config.json` in the checkout root. You can start from `config.sample.json` in the Element Web release archive.
+2. Run `cp .htaccess.example .htaccess` and adjust it if needed. These two local files are copied into every deployment.
+3. Pick a version and copy the archive's SHA-256 digest (without `sha256:`) from the [Element Web releases](https://github.com/element-hq/element-web/releases) page.
+4. Run:
 
-This repository:
-1. Automatically fetches the latest Element Web releases
-2. Renames the `icons/` directory to `ui-icons/`
-3. Updates all references in CSS and HTML files accordingly
-4. Provides the processed files ready for Apache deployment
+   ```sh
+   ./scripts/deploy.sh v1.12.29 17431dd1853032f55257e5155979396758dbf2e98d969407612a4f320865ff87
+   ```
 
-## Automated Workflow
+The result goes to `processed/`. Serve that directory as the site root, for example with a symlink from your web root. To use another **dedicated** directory, set `ELEMENT_WEB_DEST` to its absolute path. Deploy the next version by rerunning the command with its version and digest; no build files are committed to Git.
 
-The GitHub Actions workflow runs:
-- **Every Monday and Thursday at 03:00 UTC**
-- **Manually via workflow dispatch**
+The archive is checked before the live directory is replaced. The digest checks the download against the release page, not the authenticity of that page. The `.htaccess` sets one-day caching for ordinary assets, no-cache for HTML, config, service worker and translations, and immutable caching for hashed bundles (when `mod_headers` is available).
 
-When a new Element Web release is detected:
-1. Downloads the release tarball
-2. Runs the rename script to process icon paths
-3. Commits the processed files to the `processed/` directory
-4. Creates a GitHub issue with the release notes
-5. Tracks the version in `current-release.txt` to avoid duplicate processing
-
-## Deployment
-
-The processed Element Web files are available in the `processed/` directory. Deploy them to your Apache web server as you would normally deploy Element Web.
-
-1. backup your config.json file
-2. Clone this repository to your hosting / server
-3. create a symlink to the /processed folder to serve the application
-4. copy your config.json file back into the processed folder
-
-## Production update process
-
-1. backup your config.json `cp ./processed/config.json ./config.json`
-2. update the contents `git pull && cp config.json ./processed/config.json`
-
-## How the search / replace script works
-
-The `scripts/rename.sh` script:
-1. Copies the source files to the destination directory
-2. Finds all CSS files and updates icon path references:
-   - `/icons/` → `/ui-icons/`
-   - `../../icons/` → `../../ui-icons/`
-3. Updates `index.html` icon references
-4. Renames the physical `icons/` directory to `ui-icons/`
+Run `bash tests/deploy.sh` for an offline deployment check.
 
 ## License
 
-This repository contains automation scripts and workflows and is licensed under **AGPL-3.0**. The `processed/` folder contains files from [element-web](https://github.com/element-hq/element-web) and remains licensed under **AGPL** according to the upstream license.
+The automation is AGPL-3.0. Deployed Element Web files retain their upstream license.
+
+## Migration
+
+Before pulling this change, copy `processed/config.json` to the checkout root as `config.json`, and save your deployed `.htaccess` there (or copy the example afterward). Back up the live directory, then deploy a pinned release immediately after pulling: the old tracked `processed/` files are removed by the pull. Earlier Git history still contains those builds; removing that history would require a separate repository rewrite.

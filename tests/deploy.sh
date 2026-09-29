@@ -51,4 +51,7 @@ grep -q 'ui-icons/sample.svg' "$TEST_ROOT/site/index.html"
 grep -q 'ui-icons/sample.svg' "$TEST_ROOT/site/bundles/styles.css"
 grep -q 'my config' "$TEST_ROOT/site/config.json"
 grep -q 'my headers' "$TEST_ROOT/site/.htaccess"
+
+ELEMENT_WEB_DEST=$TEST_ROOT/new-site bash "$TEST_ROOT/repo/scripts/deploy.sh" "$VERSION" "$SHA256" >/dev/null
+[[ -f $TEST_ROOT/new-site/index.html && -f $TEST_ROOT/new-site/.htaccess ]]
 echo "Deployment checks passed"
