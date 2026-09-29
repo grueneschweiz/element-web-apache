@@ -19,6 +19,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Check deployment
+        run: bash tests/deploy.sh
       - name: Check release publishing
         run: bash tests/release.sh
       - name: Publish latest upstream release
