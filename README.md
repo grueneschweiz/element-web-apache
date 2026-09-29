@@ -9,10 +9,12 @@ You need Bash, curl, tar and sha256sum on the host. Keep this checkout outside t
 1. Put your Element `config.json` in the checkout root. You can start from `config.sample.json` in the Element Web release archive.
 2. Run `cp .htaccess.example .htaccess` and adjust it if needed. These two local files are copied into every deployment.
 3. Pick a version and copy the archive's SHA-256 digest from [this repository's releases](https://github.com/grueneschweiz/element-web-apache/releases) or the [upstream releases](https://github.com/element-hq/element-web/releases) page (without `sha256:`).
-4. Run:
+4. Set the version and digest from the release page, then run:
 
    ```sh
-   ./scripts/deploy.sh v1.12.29 17431dd1853032f55257e5155979396758dbf2e98d969407612a4f320865ff87
+   ELEMENT_VERSION='vX.Y.Z'
+   ELEMENT_SHA256='paste-the-64-character-digest-here'
+   ./scripts/deploy.sh "$ELEMENT_VERSION" "$ELEMENT_SHA256"
    ```
 
 The result goes to `processed/`. Serve that directory as the site root, for example with a symlink from your web root. To use another **dedicated** directory, set `ELEMENT_WEB_DEST` to its absolute path. Deploy the next version by rerunning the command with its version and digest; no build files are committed to Git.
