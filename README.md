@@ -8,7 +8,7 @@ You need Bash, curl, tar and sha256sum on the host. Keep this checkout outside t
 
 1. Put your Element `config.json` in the checkout root. You can start from `config.sample.json` in the Element Web release archive.
 2. Run `cp .htaccess.example .htaccess` and adjust it if needed. These two local files are copied into every deployment.
-3. Pick a version and copy the archive's SHA-256 digest (without `sha256:`) from the [Element Web releases](https://github.com/element-hq/element-web/releases) page.
+3. Pick a version and copy the archive's SHA-256 digest from [this repository's releases](https://github.com/grueneschweiz/element-web-apache/releases) or the [upstream releases](https://github.com/element-hq/element-web/releases) page (without `sha256:`).
 4. Run:
 
    ```sh
@@ -19,7 +19,7 @@ The result goes to `processed/`. Serve that directory as the site root, for exam
 
 The archive is checked before the live directory is replaced. The digest checks the download against the release page, not the authenticity of that page. The `.htaccess` sets one-day caching for ordinary assets, no-cache for HTML, config, service worker and translations, and immutable caching for hashed bundles (when `mod_headers` is available).
 
-Run `bash tests/deploy.sh` for an offline deployment check.
+This repository publishes a GitHub release for each new upstream version it detects, with the upstream changelog and archive SHA-256. You can also run the workflow manually. Releases contain no build files. Run `bash tests/deploy.sh` and `bash tests/release.sh` for offline checks.
 
 ## License
 
