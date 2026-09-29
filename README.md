@@ -27,4 +27,4 @@ The automation is AGPL-3.0. Deployed Element Web files retain their upstream lic
 
 ## Migration
 
-Before pulling this change, copy `processed/config.json` to the checkout root as `config.json`, and save your deployed `.htaccess` there (or copy the example afterward). Back up the live directory, then deploy a pinned release immediately after pulling: the old tracked `processed/` files are removed by the pull. Earlier Git history still contains those builds; removing that history would require a separate repository rewrite.
+Before pulling this change, copy `processed/config.json` to the checkout root as `config.json`, and save your deployed `.htaccess` there (or copy the example afterward). Back up the live directory, then deploy a pinned release immediately after pulling: the old tracked `processed/` files are removed by the pull.
