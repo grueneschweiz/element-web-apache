@@ -17,11 +17,11 @@ You need Bash, curl, tar and sha256sum on the host. Keep this checkout outside t
    ./scripts/deploy.sh "$ELEMENT_VERSION" "$ELEMENT_SHA256"
    ```
 
-The result goes to `processed/`. Serve that directory as the site root, for example with a symlink from your web root. To use another **dedicated** directory, set `ELEMENT_WEB_DEST` to its absolute path. Deploy the next version by rerunning the command with its version and digest; no build files are committed to Git.
+The result goes to `processed/`. Serve that directory as the site root, for example with a symlink from your web root. To use another **dedicated** directory, set `ELEMENT_WEB_DEST` to its absolute path. Deploy the next version by rerunning the command with its version and digest.
 
 The archive is checked before the live directory is replaced. The digest checks the download against the release page, not the authenticity of that page. The `.htaccess` sets one-day caching for ordinary assets, no-cache for HTML, config, service worker and translations, and immutable caching for hashed bundles (when `mod_headers` is available).
 
-This repository publishes a GitHub release for each new upstream version it detects, linking to the upstream changelog and listing the archive SHA-256. You can also run the workflow manually. Releases contain no build files. Run `bash tests/deploy.sh` and `bash tests/release.sh` for offline checks.
+This repository publishes a GitHub release for each new upstream version it detects.
 
 ## License
 
